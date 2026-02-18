@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Inadimplência</title>
+
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="icon" type="image/png" href="./icon-192.png">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --accent: #38bdf8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 600px;
+            padding: 32px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+            color: white;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .row .input-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper span {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        input {
+            width: 100%;
+            background-color: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px 12px 16px;
+            color: white;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input.has-icon {
+            padding-left: 40px;
+        }
+
+        /* Date input specific styling for webkit */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        button.primary-btn {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            margin-top: 10px;
+        }
+
+        button.primary-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button.primary-btn:active {
+            transform: scale(0.98);
+        }
+
+        button.secondary-btn {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        button.secondary-btn:hover {
+            border-color: var(--text-muted);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Result Styles */
+        .result-container {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            display: none;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        .result-row.total {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--border);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: white;
+        }
+
+        .result-row.total .result-value {
+            color: var(--success);
+        }
+
+        /* Multi-Title specific styles */
+        .titles-list {
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .titles-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 40px;
+            gap: 10px;
+            padding: 10px 16px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .title-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 40px;
+            gap: 10px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            align-items: Center;
+        }
+
+        .title-item:last-child {
+            border-bottom: none;
+        }
+
+        .remove-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: none;
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .remove-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .add-btn {
+            width: 100%;
+            margin-top: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border: 1px dashed var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .add-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .detailed-result {
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .detailed-item {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+
+        .detailed-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+
+        .detailed-header {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-size: 0.75rem;
+        }
+
+        .detailed-values {
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-weight: 500;
+        }
+
+        .tag-delay {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+
+        .footer {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .alert-info {
+            background-color: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Calculadora de Inadimplência</h1>
+        <p class="subtitle">Cálculo de Juros e Multa para Mensalidades em Atraso</p>
+
+        <!-- Main Content (Multi-Title Only) -->
+        <div>
+            <div class="input-group">
+                <label>Data para Pagamento (Data Base)</label>
+                <div class="alert-info">
+                    Esta data será usada para calcular os dias de atraso de todos os títulos abaixo.
+                </div>
+                <input type="date" id="multi-data-pagamento" required>
+            </div>
+
+            <div class="row">
+                <div class="input-group">
+                    <label>Multa Fixa (%)</label>
+                    <div class="input-wrapper">
+                        <span>%</span>
+                        <input class="has-icon" type="number" id="multi-multa" value="2" step="0.01" min="0">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Juros Mensais (%)</label>
+                    <div class="input-wrapper">
+                        <span>%</span>
+                        <input class="has-icon" type="number" id="multi-juros-mes" value="1" step="0.01" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <label style="margin-bottom: 8px; display:block;">Lista de Mensalidades</label>
+            <div class="titles-list" id="titles-container">
+                <div class="titles-header">
+                    <span>Valor (R$)</span>
+                    <span>Vencimento</span>
+                    <span></span>
+                </div>
+                <!-- Rows will be added here -->
+            </div>
+
+            <button class="add-btn" onclick="addTitleRow()">
+                <span>+</span> Adicionar Título
+            </button>
+
+            <button class="primary-btn" onclick="calcularMulti(event)">Calcular Total Geral</button>
+
+            <div id="result-multi" class="result-container">
+                <div id="result-details" class="detailed-result">
+                    <!-- Detailed results per item -->
+                </div>
+
+                <div class="result-row total" style="margin-top: 0; padding-top: 16px; border-top: none;">
+                    <span>Total a Pagar:</span>
+                    <span class="result-value" id="res-multi-total">R$ 0,00</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Portable App • Funciona Offline
+        </div>
+    </div>
+
+    <script>
+        // --- Output Helpers ---
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const [year, month, day] = dateStr.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
+        // --- Logic ---
+
+        // Initialize with one row and today's date
+        window.onload = function () {
+            document.getElementById('multi-data-pagamento').valueAsDate = new Date();
+            // Add two initial rows since it's common to compare or sum multiple
+            addTitleRow();
+        }
+
+        function addTitleRow() {
+            const container = document.getElementById('titles-container');
+            const rowId = 'row-' + Date.now() + Math.random().toString(16).slice(2);
+
+            const div = document.createElement('div');
+            div.className = 'title-item';
+            div.id = rowId;
+
+            div.innerHTML = `
+                <div class="input-wrapper">
+                    <span>R$</span>
+                    <input class="has-icon title-val" type="number" placeholder="0,00" step="0.01" min="0">
+                </div>
+                <input class="title-date" type="date">
+                <button class="remove-btn" onclick="removeRow('${rowId}')" title="Remover">×</button>
+            `;
+
+            container.appendChild(div);
+        }
+
+        function removeRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) row.remove();
+        }
+
+        function calcularMulti(event) {
+            if (event) event.preventDefault();
+
+            const dataPagamentoStr = document.getElementById('multi-data-pagamento').value;
+            const multaPercent = parseFloat(document.getElementById('multi-multa').value) || 0;
+            const jurosMesPercent = parseFloat(document.getElementById('multi-juros-mes').value) || 0;
+
+            if (!dataPagamentoStr) {
+                alert("Selecione a Data de Pagamento.");
+                return;
+            }
+
+            const dataPagamento = new Date(dataPagamentoStr);
+            // Reset hours to start of day for accurate day diff
+            dataPagamento.setHours(0, 0, 0, 0);
+
+            const rows = document.querySelectorAll('.title-item');
+
+            let totalGeral = 0;
+            let detailsHtml = '';
+            let validItems = 0;
+
+            rows.forEach(row => {
+                const valInput = row.querySelector('.title-val');
+                const dateInput = row.querySelector('.title-date');
+
+                const valor = parseFloat(valInput.value);
+                const dataVencStr = dateInput.value;
+
+                if (isNaN(valor) || !dataVencStr) return; // Skip incomplete lines
+
+                validItems++;
+                // Fix: Parse YYYY-MM-DD manually to avoid UTC conversion shifts
+                const [vYear, vMonth, vDay] = dataVencStr.split('-').map(Number);
+                const dataVencimento = new Date(vYear, vMonth - 1, vDay);
+                dataVencimento.setHours(0, 0, 0, 0);
+
+                // Fix: Parse Payment Date manually too
+                // (Done once outside loop but let's ensure consistency here or reuse similar logic)
+                const [pYear, pMonth, pDay] = dataPagamentoStr.split('-').map(Number);
+                const dataPagamentoLocal = new Date(pYear, pMonth - 1, pDay);
+                dataPagamentoLocal.setHours(0, 0, 0, 0);
+
+                // Calculate Diff Days
+                const diffTime = dataPagamentoLocal - dataVencimento;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                let juros = 0;
+                let multa = 0;
+                let subtotal = valor;
+                let diasAtraso = 0;
+                let statusTag = '';
+
+                if (diffDays > 0) {
+                    diasAtraso = diffDays;
+                    // Multa: Arredondada em 2 casas decimais
+                    multa = Math.round(valor * (multaPercent / 100) * 100) / 100;
+
+                    // Juros: Base fixa de 30 dias (pro-rata die)
+                    // O sistema oficial arredonda o juro diário em 2 casas antes de multiplicar
+                    const dailyRate = (jurosMesPercent / 100) / 30;
+                    const dailyInterestAmount = Math.round(valor * dailyRate * 100) / 100;
+                    juros = dailyInterestAmount * diasAtraso;
+
+                    subtotal = valor + multa + juros;
+                    statusTag = `<span class="tag-delay">${diasAtraso} dias atraso</span>`;
+                } else {
+                    statusTag = `<span style="color:var(--success); font-size:0.7rem; margin-left:8px;">Em dia</span>`;
+                }
+
+                totalGeral += subtotal;
+
+                detailsHtml += `
+                 <div class="detailed-item">
+                    <div class="detailed-header">
+                        <span>Venc: ${formatDate(dataVencStr)} ${statusTag}</span>
+                        <span>Original: ${formatCurrency(valor)}</span>
+                    </div>
+                    <div class="detailed-values">
+                        <span style="font-size: 0.8rem; color: #94a3b8;">
+                            Multa: ${formatCurrency(multa)} | Juros: ${formatCurrency(juros)}
+                        </span>
+                        <span>${formatCurrency(subtotal)}</span>
+                    </div>
+                 </div>
+               `;
+            });
+
+            if (validItems === 0 && rows.length > 0) {
+                detailsHtml = '<div style="text-align:center; color:#ef4444; margin-bottom:10px;">Preencha os valores e datas corretamente.</div>';
+            } else if (rows.length === 0) {
+                detailsHtml = '<div style="text-align:center; color:#94a3b8">Nenhum título adicionado.</div>';
+            }
+
+            document.getElementById('result-details').innerHTML = detailsHtml;
+            document.getElementById('res-multi-total').textContent = formatCurrency(totalGeral);
+
+            document.getElementById('result-multi').style.display = 'block';
+        }
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => {
+                        console.log('Service Worker registrado com sucesso:', reg.scope);
+                    })
+                    .catch(err => {
+                        console.error('Falha ao registrar o Service Worker:', err);
+                    });
+            });
+        }
+    </script>
+</body>
+
+</html>
