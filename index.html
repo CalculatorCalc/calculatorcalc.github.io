@@ -269,6 +269,18 @@
         .result-value {
             font-weight: 600;
             color: var(--text);
+            flex-shrink: 0;
+        }
+
+        .dots-spacer {
+            flex-grow: 1;
+            height: 1px;
+            background-image: radial-gradient(circle, var(--text-muted) 1px, transparent 1.5px);
+            background-position: bottom;
+            background-size: 12px 2px;
+            background-repeat: repeat-x;
+            margin: 0 10px 8px 10px;
+            opacity: 0.6;
         }
 
         .result-row.total .result-value {
@@ -673,9 +685,19 @@
                 <!-- Rows will be added here -->
             </div>
 
-            <button class="add-btn" onclick="addTitleRow()">
-                <span>+</span> Adicionar Título
-            </button>
+            <div style="display: flex; gap: 12px; margin-top: 8px; margin-bottom: 24px;">
+                <button class="add-btn" onclick="addTitleRow()" style="margin: 0; flex: 2;">
+                    <span>+</span> Adicionar Título
+                </button>
+                <button class="secondary-btn" onclick="clearAllRows()"
+                    style="flex: 1; border-color: var(--danger); color: var(--danger);">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Apagar Tudo
+                </button>
+            </div>
 
             <button class="primary-btn" onclick="calcularMulti(event)">Calcular Total Geral</button>
 
@@ -687,14 +709,17 @@
                 <div class="result-row subtotal"
                     style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
                     <span>Total Original:</span>
+                    <div class="dots-spacer"></div>
                     <span class="result-value" id="res-total-original">R$ 0,00</span>
                 </div>
                 <div class="result-row subtotal">
                     <span>Total Multa:</span>
+                    <div class="dots-spacer"></div>
                     <span class="result-value" id="res-total-multa">R$ 0,00</span>
                 </div>
                 <div class="result-row subtotal">
                     <span>Total Juros:</span>
+                    <div class="dots-spacer"></div>
                     <span class="result-value" id="res-total-juros">R$ 0,00</span>
                 </div>
 
@@ -861,6 +886,19 @@
         function removeRow(rowId) {
             const row = document.getElementById(rowId);
             if (row) row.remove();
+        }
+
+        function clearAllRows() {
+            const rows = document.querySelectorAll('.title-item');
+            if (rows.length === 0) return;
+
+            if (confirm("Tem certeza que deseja limpar todos os itens?")) {
+                rows.forEach(row => row.remove());
+                addTitleRow(); // Fresh start
+
+                // Hide results
+                document.getElementById('result-multi').style.display = 'none';
+            }
         }
 
         // --- CALCULATION LOGIC (UNCHANGED) ---
