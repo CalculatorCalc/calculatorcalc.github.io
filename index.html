@@ -13,6 +13,7 @@
 
     <style>
         :root {
+            /* Dark Mode (Default) */
             --primary: #6366f1;
             --primary-hover: #4f46e5;
             --bg: #0f172a;
@@ -23,6 +24,33 @@
             --success: #22c55e;
             --danger: #ef4444;
             --accent: #38bdf8;
+            --input-bg: #0f172a;
+            --logo-filter: none;
+            --tab-save-text: white;
+            --detailed-bg: rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="light"] {
+            /* Light Mode (Corporativo Clean) */
+            --primary: #0056b3;
+            /* Azul Marinho/Royal */
+            --primary-hover: #004494;
+            --bg: #F8F9FA;
+            /* Branco/Cinza muito claro */
+            --card-bg: #FFFFFF;
+            /* Branco puro */
+            --text: #1a1a1a;
+            /* Grafite escuro */
+            --text-muted: #595959;
+            --border: #dee2e6;
+            --success: #198754;
+            --danger: #dc3545;
+            --accent: #0d6efd;
+            --input-bg: #e9ecef;
+            --logo-filter: invert(1) grayscale(100%) contrast(150%);
+            /* Start simple, tune if needed */
+            --tab-save-text: #1a1a1a;
+            --detailed-bg: #f8f9fa;
         }
 
         * {
@@ -30,6 +58,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
         body {
@@ -45,13 +74,15 @@
         .container {
             background-color: var(--card-bg);
             border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            /* Lighter shadow for light mode? */
             width: 100%;
             max-width: 600px;
             padding: 32px;
             border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         h1 {
@@ -59,7 +90,7 @@
             font-weight: 700;
             margin-bottom: 8px;
             text-align: center;
-            color: white;
+            color: var(--text);
         }
 
         p.subtitle {
@@ -105,29 +136,48 @@
 
         input {
             width: 100%;
-            background-color: #0f172a;
+            background-color: var(--input-bg);
             border: 1px solid var(--border);
             border-radius: 8px;
             padding: 12px 16px 12px 16px;
-            color: white;
+            color: var(--text);
             font-size: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s, color 0.3s;
         }
 
         input.has-icon {
             padding-left: 40px;
         }
 
-        /* Date input specific styling for webkit */
-        input[type="date"]::-webkit-calendar-picker-indicator {
+        input:read-only {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        input[type="date"] {
+            color: var(--text);
+        }
+
+        /* Fix calendar icon color in light mode */
+        [data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0);
+            /* Black icon for light bg */
+        }
+
+        [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+        :root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator {
             filter: invert(1);
-            cursor: pointer;
+            /* White icon for dark bg */
         }
 
         input:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        [data-theme="light"] input:focus {
+            box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
         }
 
         button.primary-btn {
@@ -161,11 +211,23 @@
             cursor: pointer;
             font-size: 0.85rem;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
         button.secondary-btn:hover {
             border-color: var(--text-muted);
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: rgba(125, 125, 125, 0.1);
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            /* Changed to space-between for Theme Toggle */
+            align-items: center;
+            margin-bottom: 20px;
         }
 
         /* Result Styles */
@@ -193,9 +255,20 @@
             color: var(--primary);
         }
 
+        .result-row.subtotal {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .result-row.subtotal .result-value {
+            color: var(--text);
+            font-weight: 500;
+        }
+
         .result-value {
             font-weight: 600;
-            color: white;
+            color: var(--text);
         }
 
         .result-row.total .result-value {
@@ -209,7 +282,7 @@
             overflow-y: auto;
             border: 1px solid var(--border);
             border-radius: 8px;
-            background: rgba(0, 0, 0, 0.2);
+            background: var(--detailed-bg);
         }
 
         .titles-header {
@@ -276,13 +349,21 @@
             font-weight: 500;
         }
 
+        [data-theme="light"] .add-btn {
+            background: rgba(0, 86, 179, 0.1);
+        }
+
         .add-btn:hover {
             background: rgba(99, 102, 241, 0.2);
         }
 
+        [data-theme="light"] .add-btn:hover {
+            background: rgba(0, 86, 179, 0.2);
+        }
+
         .detailed-result {
             margin-top: 20px;
-            background: rgba(0, 0, 0, 0.2);
+            background: var(--detailed-bg);
             padding: 16px;
             border-radius: 8px;
             font-size: 0.85rem;
@@ -311,7 +392,7 @@
         .detailed-values {
             display: flex;
             justify-content: space-between;
-            color: white;
+            color: var(--text);
             font-weight: 500;
         }
 
@@ -330,6 +411,21 @@
             font-size: 0.75rem;
             color: var(--text-muted);
             opacity: 0.6;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
         }
 
         .logo-container {
@@ -341,17 +437,147 @@
             max-width: 120px;
             height: auto;
             display: inline-block;
+            transition: opacity 0.3s ease;
         }
 
         .alert-info {
-            background-color: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background-color: var(--detailed-bg);
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 12px;
             margin-bottom: 24px;
             font-size: 0.85rem;
             color: var(--text-muted);
             line-height: 1.4;
+        }
+
+        [data-theme="light"] .alert-info {
+            background-color: #e2e3e5;
+            border-color: #d6d8db;
+            color: #383d41;
+        }
+
+        /* Tabs Logic */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary);
+            cursor: pointer;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .help-article h3 {
+            color: var(--text);
+            margin-bottom: 8px;
+            margin-top: 20px;
+            font-size: 1.1rem;
+        }
+
+        .help-article p,
+        .help-article ul {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .help-article ul {
+            padding-left: 20px;
+        }
+
+        .help-article strong {
+            color: var(--text);
+        }
+
+        /* --- Theme Toggle Switch --- */
+        .theme-toggle-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle-btn:hover {
+            background-color: rgba(125, 125, 125, 0.1);
+            transform: scale(1.05);
+        }
+
+        .theme-icon {
+            position: absolute;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s ease;
+        }
+
+        /* Sun Icon (for Light Mode) */
+        .icon-sun {
+            opacity: 0;
+            transform: rotate(90deg) scale(0);
+        }
+
+        /* Moon Icon (for Dark Mode) */
+        .icon-moon {
+            opacity: 1;
+            transform: rotate(0) scale(1);
+        }
+
+        /* When Light Mode is Active */
+        [data-theme="light"] .icon-sun {
+            opacity: 1;
+            transform: rotate(0) scale(1);
+        }
+
+        [data-theme="light"] .icon-moon {
+            opacity: 0;
+            transform: rotate(-90deg) scale(0);
+        }
+
+        .save-container-box {
+            background: var(--detailed-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .save-title {
+            color: var(--tab-save-text);
+            font-size: 1rem;
+            margin-bottom: 12px;
         }
     </style>
 </head>
@@ -360,13 +586,49 @@
 
     <div class="container">
         <div class="logo-container">
+            <!-- Logo will be inverted via CSS filter in light mode -->
             <img src="./logo.png" alt="Logo Calculadora" class="logo-img">
         </div>
         <h1>Calculadora de Inadimplência</h1>
         <p class="subtitle">Cálculo de Juros e Multa para Mensalidades em Atraso</p>
 
-        <!-- Main Content (Multi-Title Only) -->
-        <div>
+        <!-- Main Content (Calculator) -->
+        <div id="tab-calculator" class="tab-content active">
+
+            <!-- Action Row: Theme Toggle + Save/Import -->
+            <div class="action-row">
+                <!-- Theme Toggle -->
+                <button class="theme-toggle-btn" onclick="toggleTheme()" title="Alternar Tema">
+                    <svg class="theme-icon icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="theme-icon icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+
+                <button class="secondary-btn" onclick="switchTab('tab-save-import')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    Salvar / Importar
+                </button>
+            </div>
+
             <div class="input-group">
                 <label>Data para Pagamento (Data Base)</label>
                 <div class="alert-info">
@@ -380,14 +642,23 @@
                     <label>Multa Fixa (%)</label>
                     <div class="input-wrapper">
                         <span>%</span>
-                        <input class="has-icon" type="number" id="multi-multa" value="2" step="0.01" min="0">
+                        <input class="has-icon" type="number" id="multi-multa" value="2.00" step="0.01" min="0"
+                            readonly>
                     </div>
                 </div>
                 <div class="input-group">
-                    <label>Juros Mensais (%)</label>
+                    <label>Juros Mensais (%) <small>(aprox.)</small></label>
                     <div class="input-wrapper">
                         <span>%</span>
-                        <input class="has-icon" type="number" id="multi-juros-mes" value="1" step="0.01" min="0">
+                        <input class="has-icon" type="number" id="multi-juros-mes" value="1.00" step="0.01" min="0"
+                            readonly>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Juros Diários (%)</label>
+                    <div class="input-wrapper">
+                        <span>%</span>
+                        <input class="has-icon" type="text" value="0,0333" readonly>
                     </div>
                 </div>
             </div>
@@ -413,6 +684,20 @@
                     <!-- Detailed results per item -->
                 </div>
 
+                <div class="result-row subtotal"
+                    style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                    <span>Total Original:</span>
+                    <span class="result-value" id="res-total-original">R$ 0,00</span>
+                </div>
+                <div class="result-row subtotal">
+                    <span>Total Multa:</span>
+                    <span class="result-value" id="res-total-multa">R$ 0,00</span>
+                </div>
+                <div class="result-row subtotal">
+                    <span>Total Juros:</span>
+                    <span class="result-value" id="res-total-juros">R$ 0,00</span>
+                </div>
+
                 <div class="result-row total" style="margin-top: 0; padding-top: 16px; border-top: none;">
                     <span>Total a Pagar:</span>
                     <span class="result-value" id="res-multi-total">R$ 0,00</span>
@@ -420,8 +705,81 @@
             </div>
         </div>
 
+        <!-- Save/Import Tab -->
+        <div id="tab-save-import" class="tab-content">
+            <div class="back-link" onclick="switchTab('tab-calculator')">
+                ← Voltar para Calculadora
+            </div>
+
+            <h2 style="font-size:1.2rem; color:var(--text); margin-bottom:16px;">Salvar e Importar Dados</h2>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:24px;">
+                Salve o estado atual do seu cálculo em um arquivo para continuar depois, ou importe um arquivo salvo
+                anteriormente.
+            </p>
+
+            <div class="save-container-box">
+                <h3 class="save-title">Salvar Dados</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                    Isso criará um arquivo (.json) contendo todos os valores, datas e configurações atuais.
+                </p>
+                <button class="primary-btn" onclick="saveData()">
+                    💾 Salvar Arquivo
+                </button>
+            </div>
+
+            <div class="save-container-box">
+                <h3 class="save-title">Importar Dados</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                    Selecione um arquivo (.json) salvo anteriormente para restaurar os dados.
+                </p>
+                <input type="file" id="file-import" accept=".json" style="margin-bottom: 12px; color: var(--text);"
+                    onchange="loadData(this)">
+                <div id="import-status" style="font-size: 0.85rem; color: var(--text-muted);"></div>
+            </div>
+        </div>
+
+        <!-- Help Tab -->
+        <div id="tab-help" class="tab-content">
+            <div class="back-link" onclick="switchTab('tab-calculator')">
+                ← Voltar para Calculadora
+            </div>
+
+            <div class="help-article">
+                <h2 style="font-size:1.2rem; color:var(--text); margin-bottom:16px;">Ajuda e Instruções</h2>
+
+                <h3>Como Usar</h3>
+                <ul>
+                    <li><strong>Data para Pagamento:</strong> Defina o dia em que o pagamento será realizado. Esta data
+                        serve de base para calcular os dias de atraso.</li>
+                    <li><strong>Adicionar Título:</strong> Clique no botão "+" para adicionar quantas mensalidades
+                        desejar calcular.</li>
+                    <li><strong>Preencher Valores:</strong> Para cada título, insira o Valor Original e a Data de
+                        Vencimento.</li>
+                    <li><strong>Calcular:</strong> Clique em "Calcular Total Geral" para ver o resumo completo.</li>
+                </ul>
+
+                <h3>Entenda o Cálculo</h3>
+                <p>O sistema realiza o cálculo com base nas normas financeiras padrão para inadimplência:</p>
+                <ul>
+                    <li><strong>Multa (2% Fixa):</strong> Aplicada uma única vez sobre o valor original, independente do
+                        tempo de atraso.</li>
+                    <li><strong>Juros (1% ao Mês - Pro-rata die):</strong> Os juros são calculados proporcionalmente aos
+                        dias de atraso.</li>
+                    <li><strong>Fórmula Diária:</strong> Utilizamos a fração <code>1% / 30</code> para encontrar a taxa
+                        diária exata.</li>
+                    <li><strong>Detalhe Importante:</strong> O visual exibe "0,0333%" apenas para conferência, mas
+                        internamente o cálculo é feito com precisão.</li>
+                    <li><strong>Arredondamento:</strong> O valor monetário dos juros de um único dia é calculado e
+                        <strong>arredondado para 2 casas decimais</strong> antes de ser multiplicado pelo número de dias
+                        de atraso. Isso garante que o valor cobrado esteja alinhado com práticas bancárias comuns.
+                    </li>
+                </ul>
+            </div>
+        </div>
+
         <div class="footer">
-            Portable App • Funciona Offline
+            <span>Portable App • Funciona Offline</span>
+            <a onclick="switchTab('tab-help')">Ajuda</a>
         </div>
     </div>
 
@@ -437,6 +795,40 @@
             return `${day}/${month}/${year}`;
         }
 
+        // --- Theme Logic ---
+        // --- Theme Logic ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateLogo(newTheme);
+        }
+
+        function updateLogo(theme) {
+            const img = document.querySelector('.logo-img');
+            if (theme === 'light') {
+                img.src = './logo-light.png';
+            } else {
+                img.src = './logo.png';
+            }
+        }
+
+        // Initialize Theme
+        (function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            // Default to dark if not saved, or use saved
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                updateLogo('light');
+            } else {
+                updateLogo('dark');
+            }
+        })();
+
+
         // --- Logic ---
 
         // Initialize with one row and today's date
@@ -446,7 +838,7 @@
             addTitleRow();
         }
 
-        function addTitleRow() {
+        function addTitleRow(val = '', date = '') {
             const container = document.getElementById('titles-container');
             const rowId = 'row-' + Date.now() + Math.random().toString(16).slice(2);
 
@@ -457,9 +849,9 @@
             div.innerHTML = `
                 <div class="input-wrapper">
                     <span>R$</span>
-                    <input class="has-icon title-val" type="number" placeholder="0,00" step="0.01" min="0">
+                    <input class="has-icon title-val" type="number" placeholder="0,00" step="0.01" min="0" value="${val}">
                 </div>
-                <input class="title-date" type="date">
+                <input class="title-date" type="date" value="${date}">
                 <button class="remove-btn" onclick="removeRow('${rowId}')" title="Remover">×</button>
             `;
 
@@ -471,6 +863,7 @@
             if (row) row.remove();
         }
 
+        // --- CALCULATION LOGIC (UNCHANGED) ---
         function calcularMulti(event) {
             if (event) event.preventDefault();
 
@@ -490,6 +883,9 @@
             const rows = document.querySelectorAll('.title-item');
 
             let totalGeral = 0;
+            let totalOriginal = 0;
+            let totalMulta = 0;
+            let totalJuros = 0;
             let detailsHtml = '';
             let validItems = 0;
 
@@ -542,6 +938,9 @@
                 }
 
                 totalGeral += subtotal;
+                totalOriginal += valor;
+                totalMulta += multa;
+                totalJuros += juros;
 
                 detailsHtml += `
                  <div class="detailed-item">
@@ -550,7 +949,7 @@
                         <span>Original: ${formatCurrency(valor)}</span>
                     </div>
                     <div class="detailed-values">
-                        <span style="font-size: 0.8rem; color: #94a3b8;">
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">
                             Multa: ${formatCurrency(multa)} | Juros: ${formatCurrency(juros)}
                         </span>
                         <span>${formatCurrency(subtotal)}</span>
@@ -562,14 +961,125 @@
             if (validItems === 0 && rows.length > 0) {
                 detailsHtml = '<div style="text-align:center; color:#ef4444; margin-bottom:10px;">Preencha os valores e datas corretamente.</div>';
             } else if (rows.length === 0) {
-                detailsHtml = '<div style="text-align:center; color:#94a3b8">Nenhum título adicionado.</div>';
+                detailsHtml = '<div style="text-align:center; color: var(--text-muted)">Nenhum título adicionado.</div>';
             }
 
             document.getElementById('result-details').innerHTML = detailsHtml;
+
+            document.getElementById('res-total-original').textContent = formatCurrency(totalOriginal);
+            document.getElementById('res-total-multa').textContent = formatCurrency(totalMulta);
+            document.getElementById('res-total-juros').textContent = formatCurrency(totalJuros);
             document.getElementById('res-multi-total').textContent = formatCurrency(totalGeral);
 
             document.getElementById('result-multi').style.display = 'block';
         }
+        // --- END CALCULATION LOGIC ---
+
+        // --- NEW FEATURES: Tabs, Save, Import ---
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        async function saveData() {
+            const dataPagamento = document.getElementById('multi-data-pagamento').value;
+            const rows = document.querySelectorAll('.title-item');
+            const titulos = [];
+
+            rows.forEach(row => {
+                const val = row.querySelector('.title-val').value;
+                const date = row.querySelector('.title-date').value;
+                if (val || date) {
+                    titulos.push({ valor: val, vencimento: date });
+                }
+            });
+
+            const dataObj = {
+                dataPagamento,
+                titulos,
+                timestamp: new Date().toISOString()
+            };
+
+            const jsonStr = JSON.stringify(dataObj, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+
+            // Try File System Access API
+            try {
+                if (window.showSaveFilePicker) {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: 'calculo_inadimplencia.json',
+                        types: [{
+                            description: 'Arquivo JSON',
+                            accept: { 'application/json': ['.json'] },
+                        }],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                    return;
+                }
+            } catch (err) {
+                console.log('User cancelled or API not supported, falling back to download.', err);
+            }
+
+            // Fallback
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'calculo_inadimplencia.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function loadData(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    if (data.dataPagamento) {
+                        document.getElementById('multi-data-pagamento').value = data.dataPagamento;
+                    }
+
+                    if (Array.isArray(data.titulos)) {
+                        const container = document.getElementById('titles-container');
+                        container.innerHTML = `
+                            <div class="titles-header">
+                                <span>Valor (R$)</span>
+                                <span>Vencimento</span>
+                                <span></span>
+                            </div>
+                        `; // Reset
+
+                        data.titulos.forEach(t => {
+                            addTitleRow(t.valor, t.vencimento);
+                        });
+
+                        if (data.titulos.length === 0) addTitleRow();
+                    }
+
+                    document.getElementById('import-status').textContent = "Dados importados com sucesso!";
+                    document.getElementById('import-status').style.color = "var(--success)";
+
+                    setTimeout(() => {
+                        switchTab('tab-calculator');
+                    }, 1000);
+
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('import-status').textContent = "Erro ao ler arquivo. Verifique o formato.";
+                    document.getElementById('import-status').style.color = "var(--danger)";
+                }
+            };
+            reader.readAsText(file);
+        }
+
     </script>
 
     <!-- Service Worker Registration -->
