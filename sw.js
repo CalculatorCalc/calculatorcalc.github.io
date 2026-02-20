@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calc-inadimplencia-v2';
+const CACHE_NAME = 'calc-inadimplencia-v1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
