@@ -12,6 +12,28 @@
     <link rel="icon" type="image/png" href="./icon-192.png">
 
     <style>
+        /* Responsive Breakpoints from Gustavo */
+        @media screen and (max-width: 630px) {
+            .row {
+                flex-direction: column !important;
+                gap: 0px !important;
+            }
+        }
+
+        @media screen and (max-width: 520px) {
+            .title-item {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 12px !important;
+                padding: 25px 16px !important;
+            }
+
+            .titles-header {
+                display: none !important;
+                /* Hide headers on mobile as rows stack vertically */
+            }
+        }
+
         :root {
             /* Dark Mode (Default) */
             --primary: #6366f1;
@@ -123,6 +145,7 @@
 
         .input-wrapper {
             position: relative;
+            width: 100%;
         }
 
         .input-wrapper span {
@@ -253,12 +276,15 @@
             font-size: 1.25rem;
             font-weight: 700;
             color: var(--primary);
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .result-row.subtotal {
             font-size: 0.9rem;
             color: var(--text-muted);
             margin-bottom: 8px;
+            flex-wrap: wrap;
         }
 
         .result-row.subtotal .result-value {
@@ -274,13 +300,14 @@
 
         .dots-spacer {
             flex-grow: 1;
-            height: 1px;
+            height: 4px;
             background-image: radial-gradient(circle, var(--text-muted) 1px, transparent 1.5px);
-            background-position: bottom;
-            background-size: 12px 2px;
+            background-position: center;
+            background-size: 12px 100%;
             background-repeat: repeat-x;
-            margin: 0 10px 8px 10px;
+            margin: 0 10px 0 10px;
             opacity: 0.6;
+            align-self: center;
         }
 
         .result-row.total .result-value {
@@ -313,12 +340,12 @@
         }
 
         .title-item {
-            display: grid;
-            grid-template-columns: 1fr 1fr 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             gap: 10px;
             padding: 10px 16px;
             border-bottom: 1px solid var(--border);
-            align-items: Center;
         }
 
         .title-item:last-child {
@@ -326,8 +353,10 @@
         }
 
         .remove-btn {
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            flex-shrink: 0;
             border-radius: 4px;
             border: none;
             background: rgba(239, 68, 68, 0.2);
@@ -337,6 +366,8 @@
             justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 1.2rem;
+            line-height: 1;
         }
 
         .remove-btn:hover {
@@ -675,7 +706,11 @@
                 </div>
             </div>
 
-            <label style="margin-bottom: 8px; display:block;">Lista de Mensalidades</label>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+                <label style="margin: 0;">Lista de Mensalidades</label>
+                <span id="row-count" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">(0
+                    mensalidades)</span>
+            </div>
             <div class="titles-list" id="titles-container">
                 <div class="titles-header">
                     <span>Valor (R$)</span>
@@ -685,12 +720,12 @@
                 <!-- Rows will be added here -->
             </div>
 
-            <div style="display: flex; gap: 12px; margin-top: 8px; margin-bottom: 24px;">
-                <button class="add-btn" onclick="addTitleRow()" style="margin: 0; flex: 2;">
+            <div style="display: flex; gap: 12px; margin-top: 8px; margin-bottom: 24px; flex-wrap: wrap;">
+                <button class="add-btn" onclick="addTitleRow()" style="margin: 0; flex: 2; min-width: 160px;">
                     <span>+</span> Adicionar Boleto
                 </button>
                 <button class="secondary-btn" onclick="clearAllRows()"
-                    style="flex: 1; border-color: var(--danger); color: var(--danger);">
+                    style="flex: 1; border-color: var(--danger); color: var(--danger); min-width: 140px;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 6h18"></path>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -861,6 +896,13 @@
             document.getElementById('multi-data-pagamento').valueAsDate = new Date();
             // Add two initial rows since it's common to compare or sum multiple
             addTitleRow();
+            updateRowCounter();
+        }
+
+        function updateRowCounter() {
+            const count = document.querySelectorAll('.title-item').length;
+            const text = count === 1 ? `(1 mensalidade)` : `(${count} mensalidades)`;
+            document.getElementById('row-count').textContent = text;
         }
 
         function addTitleRow(val = '', date = '') {
@@ -881,11 +923,15 @@
             `;
 
             container.appendChild(div);
+            updateRowCounter();
         }
 
         function removeRow(rowId) {
             const row = document.getElementById(rowId);
-            if (row) row.remove();
+            if (row) {
+                row.remove();
+                updateRowCounter();
+            }
         }
 
         function clearAllRows() {
@@ -898,6 +944,7 @@
 
                 // Hide results
                 document.getElementById('result-multi').style.display = 'none';
+                updateRowCounter();
             }
         }
 
@@ -970,7 +1017,7 @@
                     juros = dailyInterestAmount * diasAtraso;
 
                     subtotal = valor + multa + juros;
-                    statusTag = `<span class="tag-delay">${diasAtraso} dias atraso</span>`;
+                    statusTag = `<span class="tag-delay">${diasAtraso} dias de atraso</span>`;
                 } else {
                     statusTag = `<span style="color:var(--success); font-size:0.7rem; margin-left:8px;">Em dia</span>`;
                 }
@@ -1100,6 +1147,7 @@
                         });
 
                         if (data.titulos.length === 0) addTitleRow();
+                        updateRowCounter();
                     }
 
                     document.getElementById('import-status').textContent = "Dados importados com sucesso!";
