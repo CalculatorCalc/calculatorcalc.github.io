@@ -1,4 +1,6 @@
-const CACHE_NAME = 'calc-inadimplencia-v1';
+// Nome do cache para controle de versão
+const CACHE_NAME = 'dec-calc-v4.3';
+// Lista de arquivos para cache offline
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,6 +9,7 @@ const ASSETS_TO_CACHE = [
   './icon-512.png'
 ];
 
+// Evento de instalação: Cachear os recursos iniciais
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -15,6 +18,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
+// Evento de busca: Tentar servir do cache primeiro
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
@@ -23,6 +27,7 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
+// Evento de ativação: Limpar caches antigos
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keyList) => {
